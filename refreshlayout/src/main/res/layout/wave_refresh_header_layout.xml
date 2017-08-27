@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FAFAFA"
+    android:gravity="center">
+    <com.goach.refreshlayout.widget.TitanicTextView
+        android:id="@+id/tvTitanic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#212121"
+        android:textSize="20sp"
+        android:text="加载中"
+        />
+    <TextView
+        android:id="@+id/tvTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:textColor="#A1A1A1"
+        android:textSize="14sp"
+        android:text="下拉推荐"/>
+</LinearLayout>

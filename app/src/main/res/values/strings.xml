@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Refresh-master</string>
+
+    <string-array name="tabName">
+        <item>RecyclerView</item>
+    </string-array>
+</resources>

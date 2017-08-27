@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion project.ANDROID_BUILD_SDK_VERSION as int
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION as String
+
+
+    defaultConfig {
+        minSdkVersion project.ANDROID_BUILD_MIN_SDK_VERSION as int
+        targetSdkVersion project.ANDROID_BUILD_TARGET_SDK_VERSION as int
+        versionCode 1
+        versionName "1.0"
+
+    }
+    buildTypes {
+        release {
+            debuggable project.debuggable.toBoolean()
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile parent.ext.libSupportV4
+    compile parent.ext.libSupportV7
+
+    compile parent.ext.libAnko
+    compile parent.ext.libAnkoSqlite
+    compile parent.ext.libAnkoSupportV4
+
+    compile parent.ext.libRxJava
+    compile parent.ext.libRxKotlin
+    compile parent.ext.libRxAndroid
+
+
+    compile parent.ext.libAnimation
+}
