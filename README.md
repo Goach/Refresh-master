@@ -17,7 +17,7 @@
 
 ```
 	dependencies {
-	        compile 'com.github.Goach:Refresh-master:1.0.0'
+	       compile 'com.github.Goach.Refresh-master:refreshlayout:1.0.0'
 	}
 ```
 
