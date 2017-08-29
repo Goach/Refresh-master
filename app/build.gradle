@@ -26,7 +26,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.github.Goach.Refresh-master:base:1.0.0'
+    compile 'com.github.Goach.Refresh-master:refreshlayout:1.0.0'
 
     compile parent.ext.libKotlin
     compile parent.ext.libSupportV4
