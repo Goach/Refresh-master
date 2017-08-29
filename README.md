@@ -110,3 +110,16 @@
     </com.goach.refreshlayout.widget.PullRefreshLayout>
 </android.support.design.widget.CoordinatorLayout>
 ```
+
+
+开始下拉刷新
+
+```
+ttRefreshLayout.setRefreshing()
+```
+
+刷新完成
+
+```
+ttRefreshLayout.endRefresh()
+```
