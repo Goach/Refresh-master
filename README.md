@@ -24,6 +24,7 @@
 #简单实用
 - ScrollView
 
+```
 <com.goach.refreshlayout.widget.PullRefreshLayout
         android:id="@+id/ttRefreshLayout"
         android:layout_width="match_parent"
@@ -42,12 +43,13 @@
 		</LinearLayout>
             </ScrollView>
     </com.goach.refreshlayout.widget.PullRefreshLayout>
-    
+ ```   
     
     
     
 - RecyclerView
 
+```
 <com.goach.refreshlayout.widget.PullRefreshLayout
     android:id="@+id/ttRefreshLayout"
     android:layout_width="match_parent"
@@ -59,9 +61,10 @@
         android:layout_height="match_parent"
         app:layoutManager="LinearLayoutManager"/>
 </com.goach.refreshlayout.widget.PullRefreshLayout>
-
+```
 - CoordinationLayout
 
+```
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -106,3 +109,4 @@
             </RelativeLayout>
     </com.goach.refreshlayout.widget.PullRefreshLayout>
 </android.support.design.widget.CoordinatorLayout>
+```
