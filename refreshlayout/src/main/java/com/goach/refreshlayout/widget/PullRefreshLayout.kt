@@ -18,10 +18,9 @@ import org.jetbrains.anko.dip
 
 /**
  * Created by iGoach on 2017/7/22.
- * 今日头条头部布局
- *
+ * 事件处理
  */
-class PullRefreshLayout : LinearLayout{
+class PullRefreshLayout : LinearLayout,NestedScrollingParent,NestedScrollingChild{
 
     private lateinit var mHeaderView: View
     private var INVALID_POINTER = -1
@@ -38,6 +37,12 @@ class PullRefreshLayout : LinearLayout{
     private var mTouchSlop:Int = 0
     private var mCurrentRefreshState = RefreshStatus.IDLE
     private lateinit var mHeaderHolder:BaseHeaderHolder
+    private var mNestedScrollingParentHelper:NestedScrollingParentHelper
+    private var mNestedScrollingChildHelper:NestedScrollingChildHelper
+    private var mTotalUnconsumed: Float = 0f
+    private var mNestedScrollInProgress: Boolean = false
+    private val mParentScrollConsumed = IntArray(2)
+    private val mParentOffsetInWindow = IntArray(2)
 
     constructor(context: Context):this(context,null)
     constructor(context: Context, attributeSet: AttributeSet?):this(context,attributeSet,0)
@@ -46,6 +51,9 @@ class PullRefreshLayout : LinearLayout{
         isEnabled = true
         orientation = LinearLayout.VERTICAL
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop
+        mNestedScrollingParentHelper = NestedScrollingParentHelper(this)
+        mNestedScrollingChildHelper = NestedScrollingChildHelper(this)
+        isNestedScrollingEnabled = true
         initHeaderView()
     }
     fun initHeaderView(){
@@ -60,7 +68,7 @@ class PullRefreshLayout : LinearLayout{
     }
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         ensureTarget()
-        if(!isEnabled||mRefreshing||mIsBeingDragged||canChildScrollUp())
+        if(!isEnabled||mRefreshing||mIsBeingDragged||canChildScrollUp()||mNestedScrollInProgress)
             return false
         val action = ev.actionMasked
         var pointerIndex = INVALID_POINTER
@@ -138,23 +146,24 @@ class PullRefreshLayout : LinearLayout{
                 return false
             }
             MotionEvent.ACTION_UP ->{
-                if(mCurrentRefreshState==RefreshStatus.RELEASE_REFRESH)
-                    mCurrentRefreshState = RefreshStatus.REFRESHING
-                else mCurrentRefreshState = RefreshStatus.IDLE
-                handlerRefreshChange()
+                handlerActionUp()
                 return false
             }
 
         }
         return true
     }
-
+    fun handlerActionUp(){
+        if(mCurrentRefreshState==RefreshStatus.RELEASE_REFRESH)
+            mCurrentRefreshState = RefreshStatus.REFRESHING
+        else mCurrentRefreshState = RefreshStatus.IDLE
+        handlerRefreshChange()
+    }
     fun startDragging(y:Float){
         val diffY = y - mInitialDownY
         if(diffY>mTouchSlop&&!mIsBeingDragged||mRefreshing){
             mIsBeingDragged = true
             mInitialMotionY = mInitialDownY + mTouchSlop
-            //setPadding 滑动中会有抖动问题
             ViewCompat.offsetTopAndBottom(mHeaderView, (diffY).toInt())
         }
     }
@@ -218,7 +227,112 @@ class PullRefreshLayout : LinearLayout{
             mActivePointerId = ev.getPointerId(newPointerIndex)
         }
     }
+    // NestedScrollingParent
+    override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
+        return isEnabled&&!mRefreshing&&!mIsBeingDragged&&!canChildScrollUp()
+    }
 
+    override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
+        super.onNestedScrollAccepted(child, target, axes)
+        mNestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes)
+        startNestedScroll(axes and ViewCompat.SCROLL_AXIS_VERTICAL)
+        mTotalUnconsumed = 0f
+        mNestedScrollInProgress = true
+    }
+
+    override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
+        super.onNestedPreScroll(target, dx, dy, consumed)
+        if (dy > 0 && mTotalUnconsumed > 0) {
+            if (dy > mTotalUnconsumed) {
+                consumed[1] = dy - mTotalUnconsumed.toInt()
+                mTotalUnconsumed = 0f
+            } else {
+                mTotalUnconsumed -= dy.toFloat()
+                consumed[1] = dy
+            }
+        }
+        val parentConsumed = mParentScrollConsumed
+        if (dispatchNestedPreScroll(dx - consumed[0], dy - consumed[1], parentConsumed, null)) {
+            consumed[0] += parentConsumed[0]
+            consumed[1] += parentConsumed[1]
+        }
+    }
+
+    override fun getNestedScrollAxes(): Int {
+        return mNestedScrollingParentHelper.nestedScrollAxes
+    }
+    //最后停止滚动的时候调用
+    override fun onStopNestedScroll(target: View) {
+        mNestedScrollingParentHelper.onStopNestedScroll(target)
+        mNestedScrollInProgress = false
+        if (mTotalUnconsumed > 0) {
+            handlerActionUp()
+            mTotalUnconsumed = 0f
+        }
+        stopNestedScroll()
+    }
+
+    override fun onNestedScroll(target: View, dxConsumed: Int, dyConsumed: Int,
+                                dxUnconsumed: Int, dyUnconsumed: Int) {
+        dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed,
+                mParentOffsetInWindow)
+
+        val dy = dyUnconsumed + mParentOffsetInWindow[1]
+        if (dy < 0 && !canChildScrollUp()) {
+            mTotalUnconsumed += Math.abs(dy).toFloat()
+            moveSpinner(mTotalUnconsumed)
+        }
+    }
+    // NestedScrollingChild
+    //设置控件为嵌套滚动
+    override fun setNestedScrollingEnabled(enabled: Boolean) {
+        mNestedScrollingChildHelper.isNestedScrollingEnabled = enabled
+    }
+    //是否可以滚动
+    override fun isNestedScrollingEnabled(): Boolean {
+        return mNestedScrollingChildHelper.isNestedScrollingEnabled
+    }
+    //开启嵌套滚动流程，嵌套滚动前的准备工作
+    override fun startNestedScroll(axes: Int): Boolean {
+        return mNestedScrollingChildHelper.startNestedScroll(axes)
+    }
+    //停止嵌套滚动
+    override fun stopNestedScroll() {
+        mNestedScrollingChildHelper.stopNestedScroll()
+    }
+    //判断父View是否有嵌套滚动
+    override fun hasNestedScrollingParent(): Boolean {
+        return mNestedScrollingChildHelper.hasNestedScrollingParent()
+    }
+    //子View自己滚动之前调用此方法，询问父View是否需要在子View之前进行滚动
+    override fun dispatchNestedPreScroll(dx: Int, dy: Int, consumed: IntArray?, offsetInWindow: IntArray?): Boolean {
+        return mNestedScrollingChildHelper.dispatchNestedPreScroll(
+                dx, dy, consumed, offsetInWindow)
+    }
+    //子View自己处理滚动的时候调用此方法，询问父View是否还要进行余下的滚动
+    override fun dispatchNestedScroll(dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int,
+                                      dyUnconsumed: Int, offsetInWindow: IntArray?): Boolean {
+        return mNestedScrollingChildHelper.dispatchNestedScroll(dxConsumed, dyConsumed,
+                dxUnconsumed, dyUnconsumed, offsetInWindow)
+    }
+
+    override fun onNestedPreFling(target: View, velocityX: Float,
+                                  velocityY: Float): Boolean {
+        return dispatchNestedPreFling(velocityX, velocityY)
+    }
+
+    override fun onNestedFling(target: View, velocityX: Float, velocityY: Float,
+                               consumed: Boolean): Boolean {
+        return dispatchNestedFling(velocityX, velocityY, consumed)
+    }
+    //滑动时调用
+    override fun dispatchNestedFling(velocityX: Float, velocityY: Float, consumed: Boolean): Boolean {
+        return mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed)
+    }
+    //滑动前调用
+    override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float): Boolean {
+        return mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY)
+    }
     private fun handlerChangeToRefreshing(){
         val refreshAnimator = ValueAnimator.ofFloat(mHeaderView.paddingTop.toFloat(),mHeaderHolder.refreshBorderTop())
         refreshAnimator.addUpdateListener { animation ->
