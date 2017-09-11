@@ -17,10 +17,10 @@ class CoordinationLayoutActivity : AppCompatActivity() {
         setContentView(R.layout.activity_coordination_layout)
         recyclerView.adapter = Adapter(ctx)
         btnStart.onClick{
-            ttRefreshLayout.setRefreshing()
+          //  ttRefreshLayout.setRefreshing()
         }
         btnStop.onClick{
-            ttRefreshLayout.endRefresh()
+           // ttRefreshLayout.endRefresh()
         }
     }
     class Adapter(private val context: Context): RecyclerView.Adapter<Adapter.AdapterViewHolder>(){

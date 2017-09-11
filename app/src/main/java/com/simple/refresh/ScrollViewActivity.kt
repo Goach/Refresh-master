@@ -15,12 +15,12 @@ class ScrollViewActivity:AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scrollview)
-        ttRefreshLayout.setRefreshing()
+      //  ttRefreshLayout.setRefreshing()
         btnStart.onClick{
-            ttRefreshLayout.setRefreshing()
+         //   ttRefreshLayout.setRefreshing()
         }
         btnStop.onClick{
-            ttRefreshLayout.endRefresh()
+         //   ttRefreshLayout.endRefresh()
         }
     }
 }

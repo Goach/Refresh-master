@@ -2,22 +2,25 @@ package com.goach.refreshlayout.holder
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.goach.refreshlayout.R
+import com.goach.refreshlayout.const.RefreshState
 import com.goach.refreshlayout.utils.cling
 import com.goach.refreshlayout.widget.BoxView
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.find
+import org.jetbrains.anko.topPadding
 
 /**
  * Created by iGoach on 2017/7/22.
  * 今日头条头部
  */
-class TTHeaderHolder(private val context: Context):BaseHeaderHolder() {
+class TTHeaderHolder(private val context: Context): IHeaderHolder {
     private var DEFAULT_RADIUS = context.dip(10)
     private var DEFAULT_PADDING = context.dip(3)
     private var DEFAULT_BORDER_COLOR = Color.parseColor("#ADAEAE")
@@ -56,6 +59,7 @@ class TTHeaderHolder(private val context: Context):BaseHeaderHolder() {
     }
     override fun initView(headerView:View) {
         super.initView(headerView)
+        Log.d("zgx","scrollY===initView")
         mBoxView = headerView.find<BoxView>(R.id.boxView)
         mTipTextView = headerView.find<TextView>(R.id.tvRefreshTip)
         mTipTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,mTipTextSize)
@@ -70,26 +74,34 @@ class TTHeaderHolder(private val context: Context):BaseHeaderHolder() {
                 .setProgress(mProgress)
     }
 
-    override fun handlerRefreshState(headerView: View, scrollY: Int){
-        mBoxView.setProgress(context.cling(0f,mRefreshBorderHeight*1.0f,scrollY.toFloat())/(mRefreshBorderHeight*1.0f))
-    }
-    override fun refreshStatusIDIE(headerView: View) {
-        mTipTextView.text = mTipTextPull
-        mBoxView.stopAnim()
-    }
-    override fun refreshStatusPullDown(headerView:View) {
-        mTipTextView.text =  mTipTextPull
+    override fun moveSpinner(headerView: View, scrollY: Int){
+        val paddingTop = headerView.paddingTop*1.0f
+        val minHeight = headerView.measuredHeight - headerView.paddingTop*1.0f
+        val newScrollY = scrollY - minHeight*1.0f
+        mBoxView.setProgress(context.cling(0f,paddingTop,newScrollY)/paddingTop)
     }
 
-    override fun refreshBorderTop() = mRefreshBorderHeight*1.0f
-    override fun refreshStatusRefreshing(headerView:View) {
-        mBoxView.setProgress(1.0f)
-        mBoxView.startAnim()
-        mTipTextView.text = mTipTextRefreshing
-    }
-
-    override fun refreshStatusRelease(headerView:View) {
-        mTipTextView.text =  mTipTextRelease
+    override fun onStateChanged(headerView: View, oldState: RefreshState, newState: RefreshState) {
+        when(newState){
+            RefreshState.None -> {
+                mBoxView.setProgress(0f)
+                mBoxView.stopAnim()
+                mTipTextView.text =  mTipTextPull
+            }
+            RefreshState.PullDownToRefresh -> {
+                mTipTextView.text =  mTipTextPull
+            }
+            RefreshState.Refreshing -> {
+                mBoxView.setProgress(1.0f)
+                mBoxView.startAnim()
+                mTipTextView.text = mTipTextRefreshing
+            }
+            RefreshState.ReleaseToRefresh ->{
+                mTipTextView.text =  mTipTextRelease
+            }
+            else -> {
+            }
+        }
     }
 
     fun setRadius(radius:Int){

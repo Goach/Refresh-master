@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Refresh-master.iml" filepath="$PROJECT_DIR$/Refresh-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/base/base.iml" filepath="$PROJECT_DIR$/base/base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/refreshlayout/refreshlayout.iml" filepath="$PROJECT_DIR$/refreshlayout/refreshlayout.iml" />
     </modules>
   </component>
 </project>

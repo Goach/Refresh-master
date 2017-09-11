@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="PullRefreshLayout">
+ <!--   <declare-styleable name="PullRefreshLayout">
         <attr name="radius" format="dimension"/>
         <attr name="padding" format="dimension"/>
         <attr name="borderColor" format="color"/>
@@ -13,5 +13,5 @@
         <attr name="tipTextPull" format="string"/>
         <attr name="tipTextRelease" format="string"/>
         <attr name="tipTextRefreshing" format="string"/>
-    </declare-styleable>
+    </declare-styleable>-->
 </resources>

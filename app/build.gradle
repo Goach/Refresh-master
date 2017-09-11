@@ -26,8 +26,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.github.Goach.Refresh-master:refreshlayout:1.0.0'
-
+    //compile 'com.github.Goach.Refresh-master:refreshlayout:1.0.0'
+    compile project(':refreshlayout')
     compile parent.ext.libKotlin
     compile parent.ext.libSupportV4
     compile parent.ext.libSupportV7
@@ -35,7 +35,6 @@ dependencies {
     compile parent.ext.libRecyclerView
     compile parent.ext.libCardView
     compile parent.ext.libConstraint
-
 
 
 
